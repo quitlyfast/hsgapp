@@ -48,6 +48,7 @@
 </template>
 
 <script>
+	import { company_list } from '@/config/api.js'
 	import { uniEasyinput, uniIcons } from '@dcloudio/uni-ui'
 	import formComp from '@/components/form.vue'
 	export default {
@@ -57,9 +58,14 @@
 			formComp
 		},
 		props: {
+			// 返回上一页时带回来的参数
 			selectedProportion: {
 				type: Array,
 				default: () => ([])
+			},
+			id: {
+				type: [Array, String, Number],
+				default: null
 			}
 		},
 		data() {
@@ -87,6 +93,8 @@
 					// 		id:1,
 					// 		name:'下拉框选项'
 					// 	}],
+					// to: 跳转的链接 - compName === link
+					// linkType: 跳转的方式 relaunch , navigateTo, switchTab, 请使用绝对路径， 默认是navigateTo - compName === link
 					// 	defaultValue:'默认值',
 					// start:'日期开始时间',
 					// end:'日期结束时间',
@@ -106,13 +114,10 @@
 					{
 						prop: 'contractSn',
 						label: '报价单号',
-						compName: 'select',
+						compName: 'link',
 						isRequired: true,
 						placeholder: '请选择',
-						comboxList: [{
-							id: '1111111',
-							name: 'HW-2022-02-22-04'
-						}]
+						to: 'pages/saleOrder/quotationNo/index'
 					},
 					// 客户公司名称
 					{
@@ -171,7 +176,8 @@
 					{
 						prop: 'user',
 						label: '负责人',
-						compName: 'text',
+						compName: 'link',
+						to: 'pages/saleOrder/businessManager/list?key=user&isSingle=true',
 						isRequired: true,
 						placeholder: '自动带出',
 						defaultValue: '陈海涛'
@@ -390,26 +396,91 @@
 			}
 		},
 		watch: {
-			selectedProportion(data) {
-				const list = data.map(v => {
-					return {
-						name: v.name,
-						phone: v.phone,
-						id: v.id,
-						businessRate: null,
-						accountingRate: null,
-						desc: null
-					}
-				})
-				this.proportionList = [...list, ...this.proportionList]
+			// selectedProportion(data) {
+			// 	const list = data.map(v => {
+			// 		return {
+			// 			name: v.name,
+			// 			phone: v.phone,
+			// 			id: v.id,
+			// 			businessRate: null,
+			// 			accountingRate: null,
+			// 			desc: null
+			// 		}
+			// 	})
+			// 	this.proportionList = [...list, ...this.proportionList]
+			// },
+			// 监听请求接口的数据有没发生变化
+			id (data) {
+				this.getDetails()
+				console.log(data)
 			}
 		},
+		created () {
+			this.$event.on('updateuser', val => {
+				// 替换表单参数
+				this.$refs.baseInfo.formData.user = val
+			})
+			this.$event.on('updatebusiness', data => {
+				// 替换表单参数
+				console.log(data)
+					const list = data.map(v => {
+						return {
+							salesmanId: v,
+							salesmanName: v,
+							businessRate: null,
+							accountingRate: null,
+							desc: null
+						}
+					})
+					this.$set(this, 'proportionList', list)
+				// this.$refs.baseInfo.formData.user = val
+			})
+		},
+		beforeDestroy () {
+			this.$event.off('updateuser');
+		},
 		methods: {
-
+			// 请求获取数据
+			getDetails() {
+				uni.showLoading({
+					title: '加载中',
+					mask: true
+				});	
+				console.log(this.id)
+				setTimeout(() => {
+					let obj = {}
+					this.baseInfo.forEach((v, index) => {
+						obj[v.prop] = index
+					} )
+					// Object.keys(this.$refs.baseInfo.formData).forEach(v => {
+					// 	this.$refs.baseInfo.formData[v] = obj[v]
+					// })
+					this.$set(this.$refs.baseInfo, 'formData', obj )
+					uni.hideLoading()
+				},1000)
+				// this.$http(company_list, {
+				// 		id: this.id
+				// 	})	
+				// 	.then(res => {
+				// 		Object.keys()
+				// 		uni.hideLoading()
+				// 	})
+				// 获取数据失败
+				// .catch((error) => {
+				// 	console.log(error)
+				// 	uni.showToast({
+				// 		title: '获取数据失败',
+				// 		icon: 'none',
+				// 		duration: 2000
+				// 	})
+				// })
+			},
+			
+			
 			// 选择业务员
 			selectBusinessManager() {
 				uni.navigateTo({
-					url: '/pages/saleOrder/businessManager/list'
+					url: '/pages/saleOrder/businessManager/list?key=business'
 				});
 			},
 			// 删除业务员

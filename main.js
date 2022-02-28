@@ -4,6 +4,9 @@ import baseConfig from './config/index.config.js'
 // #ifndef VUE3
 import Vue from 'vue'
 
+import bus from './utils/event'
+
+Vue.prototype.$event = bus
 
 Vue.prototype.$baseConfig = baseConfig;
 

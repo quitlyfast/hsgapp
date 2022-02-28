@@ -18,10 +18,21 @@
 			}
 		},
 		{
+			"path": "pages/saleOrder/quotationNo/index",
+			"style": {
+				"navigationBarTitleText": "报价单号",
+				"navigationStyle": "custom",
+				"enablePullDownRefresh": true,
+				"onReachBottomDistance": 50 // 上拉触底的单位，单位为px
+			}
+		},
+		{
 			"path": "pages/saleOrder/businessManager/list",
 			"style": {
 				"navigationBarTitleText": "业务员",
-				"navigationStyle": "custom"
+				"navigationStyle": "custom",
+				"enablePullDownRefresh": true,
+				"onReachBottomDistance": 50 // 上拉触底的单位，单位为px
 			}
 		},
 		{

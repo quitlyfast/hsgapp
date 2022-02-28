@@ -1,7 +1,8 @@
 <template>
 	<view class="box">
 		<view class="fixed-top_box" :style="{paddingTop: `${$statusBarHeight}px`}">
-			<uni-nav-bar shadow leftIcon="arrowleft" right-text="提交" title="标题" @clickRight="submit" @clickLeft="goBack" />
+			<uni-nav-bar shadow leftIcon="arrowleft" right-text="提交" title="标题" @clickRight="submit"
+				@clickLeft="goBack" />
 			<view class="tab-box flex align-items_center">
 				<text class="tab-item_class flex align-items_center justify-content_center"
 					:class="{'active-class': activeIndex === index}" v-for="(item, index) in tabList" :key="index"
@@ -10,7 +11,7 @@
 		</view>
 		<view class="container">
 			<!-- 基础信息 -->
-			<base-info-comp v-show="!activeIndex" ref="baseInfoComp" :selectedProportion="proportionList" />
+			<base-info-comp v-show="!activeIndex" ref="baseInfoComp" :selectedProportion="proportionList" :id="contractId"/>
 			<!-- 订单产品 -->
 			<order-product-comp v-show="activeIndex === 1" ref="orderProductComp" :selectedParts="partsList" />
 			<!-- 合同信息 -->
@@ -20,7 +21,12 @@
 </template>
 
 <script>
-	import {uniNavBar, uniSearchBar, uniEasyinput, uniIcons} from '@dcloudio/uni-ui'
+	import {
+		uniNavBar,
+		uniSearchBar,
+		uniEasyinput,
+		uniIcons
+	} from '@dcloudio/uni-ui'
 	import formComp from '@/components/form.vue'
 	import baseInfoComp from './baseInfo.vue'
 	import orderProductComp from './orderProduct.vue'
@@ -42,7 +48,9 @@
 				// 选中的业务员数据
 				proportionList: [],
 				// 选中的配件数据
-				partsList: []
+				partsList: [],
+				// 选中的报价单号id
+				contractId: null
 				// loadingText: '加载中...',
 			}
 		},
@@ -50,8 +58,13 @@
 			uni.$on('updateData', data => {
 				this.proportionList = data
 			})
+			// 返回上一页带的配件数
 			uni.$on('updateParts', data => {
 				this.partsList = data
+			})
+			// 返回上一页带的报价单号id
+			uni.$on('updateContractId', data => {
+				this.contractId = data
 			})
 		},
 		methods: {
@@ -61,7 +74,7 @@
 					delta: 1
 				});
 			},
-			
+
 			// 切换tab
 			changeTab(index) {
 				this.activeIndex = index
@@ -71,7 +84,7 @@
 			submit() {
 				let params = {}
 				new Promise((resolve, reject) => {
-					// 只是执行了表单验证，没有真的把数据提交到后台
+						// 只是执行了表单验证，没有真的把数据提交到后台
 						this.$refs.baseInfoComp.submit(data => {
 							if (data) {
 								params = Object.assign(params, data)

@@ -1,12 +1,13 @@
 <template>
 	<view class="box">
 		<view class="fixed-top_box" :style="{paddingTop: `${$statusBarHeight}px`}">
-			<uni-search-bar @confirm="searchConfirm" v-model="searchValue" ></uni-search-bar>
+			<uni-search-bar @confirm="searchConfirm" v-model="searchValue"></uni-search-bar>
 		</view>
-		
+
 		<view class="container">
 			<view class="list-box" v-if="list.length">
-				<view class="list-item_box flex align-items_center justify-content_between" v-for="(item, index) in list" :key="index" @click="selectData(item)">
+				<view class="list-item_box flex align-items_center justify-content_between"
+					v-for="(item, index) in list" :key="index" @click="selectData(item)">
 					<view class="list-item_columns">
 						<view v-for="(colItem, colIndex) in columns" :key="colIndex">
 							<view class="desc-box flex align-items_center" v-if="!colItem.hasOwnProperty('hidden')">
@@ -15,7 +16,8 @@
 							</view>
 						</view>
 					</view>
-					<view class="circle-box flex align-items_center justify-content_center" :class="{'active-select_class': item.isSelect}">
+					<view class="circle-box flex align-items_center justify-content_center"
+						:class="{'active-select_class': item.isSelect}">
 						<text class="circle-selectd" v-show="item.isSelect"></text>
 					</view>
 				</view>
@@ -30,16 +32,18 @@
 
 
 <script>
-	import {uniSearchBar} from '@dcloudio/uni-ui'
 	import {
-		principal_list
+		uniSearchBar
+	} from '@dcloudio/uni-ui'
+	import {
+		postlist
 	} from '@/config/api.js'
 	export default {
-    components: {uniSearchBar},
-		data()  {
-			return {		
-				// 这个key是为了返回
-				key: null,
+		components: {
+			uniSearchBar
+		},
+		data() {
+			return {
 				// 是否是单选项，true单选， false: 多选
 				isSingle: true,
 				// 分页接口必需字段
@@ -53,35 +57,39 @@
 				searchValue: null,
 				// 选中的数据
 				selectList: [],
+				// 展示的数据
 				/*
 					prop: 接口的字段
 					label: 字段的描述
 				*/
 				columns: [
 					{
-						prop: 'id',
+						prop: 'contractId',
 						label: '报价单号id',
 						hidden: true
 					},
 					{
-						prop: 'name',
-						label: '姓名'
+						prop: 'contractSn',
+						label: '报价单号'
 					},
 					{
-						prop: 'phone',
-						label: '电话'
+						prop: 'storeName',
+						label: '客户公司名称'
+					},
+					{
+						prop: 'user',
+						label: '负责人'
+					},
+					{
+						prop: 'orderDate',
+						label: '下单日期'
 					},
 				],
+				// 列表数据字段
 				list: [],
 			}
 		},
-		onLoad (options) {
-			const {key, isSingle} = options
-			console.log(key, !!isSingle)
-			this.isSingle = !!isSingle
-			this.key = key 
-		},
-		
+
 		// 下拉刷新
 		onPullDownRefresh() {
 			// 重置分页数据
@@ -94,7 +102,7 @@
 					uni.stopPullDownRefresh()
 				})
 		},
-		
+
 		// 上拉加载， 执行请求进行分页数据查询
 		onReachBottom() {
 			if (this.isToEnd) {
@@ -106,10 +114,11 @@
 			}
 			this.getList()
 		},
-		
+
 		mounted() {
 			this.getList()
 		},
+
 		methods: {
 			// 获取列表数据
 			getList() {
@@ -122,15 +131,17 @@
 				// 		console.log(this.list.length)
 				// 		// let index = ++(this.list.length)
 				// 		this.list.push({
-				// 			id: this.list.length,
-				// 			name: this.list.length,
-				// 			phone: '1'
+				// 			contractId: this.list.length,
+				// 			contractSn: this.list.length,
+				// 			storeName: '1',
+				// 			user: '1',
+				// 			orderDate: 1
 				// 		})
 				// 		uni.hideLoading()
 				// 	}
 				// 	this.isToEnd = this.list.length > 35
 				// }, 4000)			
-				this.$http(principal_list, {
+				this.$http(postlist, {
 						...this.paginationData,
 						name: this.searchValue
 					})	
@@ -151,6 +162,8 @@
 				// 	})
 				// })
 			},
+
+
 			// 选择用户
 			selectData(row) {
 				if (this.isSingle) {
@@ -160,16 +173,15 @@
 				}
 				row.isSelect = !row.isSelect
 				if (!row.isSelect) {
-					const index = this.selectList.findIndex(v => v === row.id)
+					const index = this.selectList.findIndex(v => v.id === row.id)
 					return this.selectList.splice(index, 1)
 				}
 				if (this.isSingle) {
-					this.selectList.splice(0, 1, row.id)
+					this.selectList.splice(0, 1, row.contractId)
 				} else {
-					this.selectList.push(row.id)
+					this.selectList.push(row.contractId)
 				}
 			},
-			
 			// 搜索
 			searchConfirm(data) {
 				const {
@@ -180,9 +192,8 @@
 				this.searchValue = value
 				this.getList()
 			},
-			
 			// 提交
-			submit () {
+			submit() {
 				// //获取所有页面栈实例列表
 				// const pages = getCurrentPages()
 				//  //当前页页面实例
@@ -192,16 +203,12 @@
 				// // 修改上一页data里面的参数
 				// prevPage.$vm.selectList = this.selectList   
 				// //uni.navigateTo跳转的返回，默认1为返回上一级
-				// uni.$emit('updateData', this.selectList)
 				if (this.selectList.length) {
-					// uni.$emit('updateContractId', this.isSingle ? this.selectList[0] : this.selectList)
-					// 这里可以打印一下，看看值是啥，然后在哪个组件里面用到的就在哪个组件里面调用on方法，看baseInfo的created
-					console.log(`update${this.key}`)
-					this.$event.emit(`update${this.key}`, this.isSingle ? this.selectList[0] : this.selectList)
+					uni.$emit('updateContractId', this.isSingle ? this.selectList[0] : this.selectList)
 				}
-
-				uni.navigateBack({  
-				    delta: 1
+				uni.$emit('updateContractId', this.isSingle ? this.selectList[0] || 5 : this.selectList)
+				uni.navigateBack({
+					delta: 1
 				});
 			},
 		}
@@ -210,61 +217,68 @@
 
 
 <style lang="scss" scoped>
-.container {
-	min-height: calc(100vh - 111px);
-}
-.list-box {
-	padding: 0 10px;
-	box-sizing: border-box;
-	background: #fff;
-	.list-item_box {
-		border-bottom: 1px solid #f1f1f1;
-		min-height: 40px;
-		font-size: 14px;
-		color: #333;
-		
-		.list-item_columns {
-			.desc-box {
-				height: 30px;
-		
-				.label-class {
-					min-width: 50px;
-				}
-		
-				text {
-					margin-left: 20px;
+	.container {
+		min-height: calc(100vh - 111px);
+	}
+
+	.list-box {
+		padding: 0 10px;
+		background: #fff;
+		box-sizing: border-box;
+
+		.list-item_box {
+			border-bottom: 1px solid #f1f1f1;
+			min-height: 40px;
+			font-size: 14px;
+			color: #333;
+
+			.list-item_columns {
+				.desc-box {
+					height: 30px;
+
+					.label-class {
+						min-width: 100px;
+					}
+
+					text {
+						margin-left: 20px;
+					}
 				}
 			}
-		}
-		.active-select_class {
-			border-color: #2979ff !important;
-		}
-		.circle-box {
-			border-radius: 100%;
-			width: 15px;
-			height: 15px;
-			border: 1px solid #f1f1f1;
-			padding: 2px;
-			box-sizing: border-box;
-			.circle-selectd {
-				display: inline-block;
-				background: #2979ff;
-				width: 100%;
-				height: 100%;
+
+			.active-select_class {
+				border-color: #2979ff !important;
+			}
+
+			.circle-box {
 				border-radius: 100%;
+				width: 15px;
+				height: 15px;
+				border: 1px solid #f1f1f1;
+				padding: 2px;
+				box-sizing: border-box;
+
+				.circle-selectd {
+					display: inline-block;
+					background: #2979ff;
+					width: 100%;
+					height: 100%;
+					border-radius: 100%;
+				}
 			}
 		}
 	}
-}
-.save-box {
-	box-shadow: 0 0 3px #ccc;
-	padding: 10px;
-	box-sizing: border-box;
-	background: #fff;
-	position: sticky;
-	bottom: 0;
-	> button {
-		display: block;
+
+	.save-box {
+		box-shadow: 0 0 3px #ccc;
+		padding: 10px;
+		box-sizing: border-box;
+		background: #fff;
+		position: sticky;
+		bottom: 0;
+
+		>button {
+			display: block;
+		}
 	}
-}
 </style>

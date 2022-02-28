@@ -2,8 +2,8 @@
 	<uni-forms ref="form" :modelValue="formData" :rules="rules" class="form-box">
 		<uni-forms-item :required="item.isRequired" label-width="150"
 			:class="{'form-item-top_class': item.labelPosition}" :label-position="item.labelPosition || 'left'"
-			:label="item.label" :name="item.prop" v-for="(item, index) in searches" :key="index"
-			class="form-item_class" :hidden="item.hidden||false">
+			:label="item.label" :name="item.prop" v-for="(item, index) in searches" :key="index" class="form-item_class"
+			:hidden="item.hidden||false">
 
 			<!-- 输入框 -->
 			<uni-easyinput :class="{'text-align_right': !item.labelPosition}" :autoHeight="item.compName === 'textarea'"
@@ -28,6 +28,11 @@
 			<!--区域-->
 			<picker-address v-else-if="item.compName === 'area'" @change="areaChange">{{txt}}</picker-address>
 
+			<!-- 链接 -->
+			<uni-list v-else-if="item.compName === 'link'" :border="item.border || false">
+				<uni-list-item :title="formData[item.prop]" :link="item.linkType || 'navigateTo'" :to="`/${item.to}`" class="minHeight text-align_right">
+				</uni-list-item>
+			</uni-list>
 			<!-- 上传 -->
 			<upload-comp v-else-if="item.compName === 'upload'" />
 		</uni-forms-item>
@@ -35,10 +40,17 @@
 </template>
 
 <script>
-	import {uniForms,uniFormsItem, uniEasyinput, uniDatetimePicker} from '@dcloudio/uni-ui'
+	import {
+		uniForms,
+		uniFormsItem,
+		uniEasyinput,
+		uniDatetimePicker,
+		uniList,
+		uniListItem
+	} from '@dcloudio/uni-ui'
 	import selectComp from './select.vue'
 	import uploadComp from './upload.vue'
- 	import pickerAddress from './area/pickerAddress.vue'
+	import pickerAddress from './area/pickerAddress.vue'
 	export default {
 		components: {
 			uniForms,
@@ -47,7 +59,9 @@
 			uniDatetimePicker,
 			selectComp,
 			uploadComp,
-			pickerAddress
+			pickerAddress,
+			uniList,
+			uniListItem
 		},
 		props: {
 			searches: {
@@ -85,11 +99,14 @@
 			this.$set(this, 'rules', rules)
 		},
 		methods: {
+			// 跳转链接点击
+			link() {},
+
 			// 区域选择
 			areaChange(data) {
 				this.txt = data.data.join('-')
 			},
-			
+
 			// 下拉框选择
 			selectCompanyFn(data) {
 				console.log(data)
@@ -129,6 +146,10 @@
 </script>
 
 <style lang="scss" scoped>
+	.minHeight {
+		height: 36px;
+	}
+
 	.form-box {
 		padding: 0 10px;
 		box-sizing: border-box;
@@ -147,9 +168,11 @@
 
 	.form-item_class {
 		margin-bottom: 10px;
+
 		/deep/ .uni-error-message-text {
 			display: none;
 		}
+
 		.datetime-class {
 
 			/deep/ .uni-date__x-input,
